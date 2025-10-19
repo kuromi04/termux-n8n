@@ -32,6 +32,283 @@ fix_apt_locks() {
     echo "Ahora puedes intentar la instalación nuevamente."
 }
 
+# Función para configurar email
+configure_email() {
+    echo -e "${GREEN}==> Configuración de Email para N8N${NC}"
+    echo ""
+    echo -e "${YELLOW}Proveedores de email soportados:${NC}"
+    echo "1) Gmail"
+    echo "2) Outlook/Hotmail"
+    echo "3) Yahoo"
+    echo "4) Otro (SMTP personalizado)"
+    echo ""
+    echo -n "Selecciona tu proveedor (1-4): "
+    read provider_choice
+    
+    case $provider_choice in
+        1)
+            SMTP_HOST="smtp.gmail.com"
+            SMTP_PORT="587"
+            ;;
+        2)
+            SMTP_HOST="smtp-mail.outlook.com"
+            SMTP_PORT="587"
+            ;;
+        3)
+            SMTP_HOST="smtp.mail.yahoo.com"
+            SMTP_PORT="587"
+            ;;
+        4)
+            echo -n "Ingresa el servidor SMTP: "
+            read SMTP_HOST
+            echo -n "Ingresa el puerto SMTP (587 para TLS, 465 para SSL): "
+            read SMTP_PORT
+            ;;
+        *)
+            echo -e "${RED}Opción inválida${NC}"
+            return 1
+            ;;
+    esac
+    
+    echo ""
+    echo -n "Ingresa tu email: "
+    read EMAIL_USER
+    echo -n "Ingresa tu contraseña de aplicación: "
+    read -s EMAIL_PASS
+    echo ""
+    
+    # Crear archivo de configuración
+    cat > "$HOME/.n8n/.env" << EOF
+# Configuración de N8N
+N8N_PORT=5678
+N8N_USER_FOLDER=\$HOME/.n8n
+NODE_ENV=production
+
+# Configuración de Email
+N8N_EMAIL_MODE=smtp
+N8N_SMTP_HOST=$SMTP_HOST
+N8N_SMTP_PORT=$SMTP_PORT
+N8N_SMTP_USER=$EMAIL_USER
+N8N_SMTP_PASS=$EMAIL_PASS
+N8N_SMTP_SENDER=$EMAIL_USER
+N8N_SMTP_SECURE=false
+
+# Configuración de notificaciones
+N8N_PERSONALIZATION_ENABLED=true
+N8N_USER_MANAGEMENT_DISABLED=false
+EOF
+    
+    echo -e "${GREEN}==> Configuración de email guardada en ~/.n8n/.env${NC}"
+    echo ""
+    echo -e "${YELLOW}IMPORTANTE:${NC}"
+    echo "- Para Gmail, usa contraseñas de aplicación, no tu contraseña normal"
+    echo "- Ve a: https://myaccount.google.com/apppasswords"
+    echo "- Genera una contraseña de aplicación para 'Mail'"
+    echo "- Usa esa contraseña en lugar de tu contraseña normal"
+    echo ""
+    echo "Reinicia n8n para aplicar los cambios:"
+    echo "  n8n restart"
+}
+
+# Función para solucionar sesiones de Termux
+fix_termux_sessions() {
+    echo -e "${GREEN}==> Solucionando problema de múltiples sesiones en Termux${NC}"
+    echo ""
+    echo -e "${YELLOW}Problema: Termux abre una nueva sesión cada vez${NC}"
+    echo ""
+    echo -e "${BLUE}Soluciones disponibles:${NC}"
+    echo "1) Configurar Termux para usar una sola sesión"
+    echo "2) Cerrar todas las sesiones existentes"
+    echo "3) Configurar autoinicio de n8n"
+    echo "4) Todas las anteriores"
+    echo ""
+    echo -n "Selecciona una opción (1-4): "
+    read choice
+    
+    case $choice in
+        1)
+            echo -e "${GREEN}==> Configurando Termux para una sola sesión${NC}"
+            
+            # Crear script de inicio único
+            cat > "$HOME/.termux_start.sh" << 'EOF'
+#!/data/data/com.termux/files/usr/bin/bash
+# Script de inicio único para Termux
+
+# Verificar si ya hay una sesión activa
+if pgrep -f "termux" > /dev/null; then
+    echo "Termux ya está ejecutándose. Usando sesión existente."
+    exit 0
+fi
+
+# Cargar configuración de n8n si existe
+if [ -f "$HOME/.n8n/.env" ]; then
+    export $(grep -v '^#' "$HOME/.n8n/.env" | xargs)
+fi
+
+# Resucitar procesos PM2
+pm2 resurrect 2>/dev/null || true
+
+echo "Termux iniciado correctamente."
+EOF
+            
+            chmod +x "$HOME/.termux_start.sh"
+            
+            # Añadir al bashrc
+            if ! grep -q ".termux_start.sh" "$HOME/.bashrc"; then
+                echo "
+# Inicio único de Termux
+source ~/.termux_start.sh" >> "$HOME/.bashrc"
+            fi
+            
+            echo -e "${GREEN}==> Configuración completada${NC}"
+            ;;
+            
+        2)
+            echo -e "${GREEN}==> Cerrando todas las sesiones de Termux${NC}"
+            
+            # Cerrar todas las sesiones de Termux
+            pkill -f "termux" 2>/dev/null || true
+            
+            echo -e "${GREEN}==> Sesiones cerradas${NC}"
+            echo "Ahora puedes abrir Termux nuevamente."
+            ;;
+            
+        3)
+            echo -e "${GREEN}==> Configurando autoinicio de n8n${NC}"
+            
+            # Crear script de autoinicio
+            cat > "$HOME/.n8n_autostart.sh" << 'EOF'
+#!/data/data/com.termux/files/usr/bin/bash
+# Autoinicio de n8n
+
+# Esperar un poco para que Termux se inicie completamente
+sleep 3
+
+# Cargar variables de entorno
+if [ -f "$HOME/.n8n/.env" ]; then
+    export $(grep -v '^#' "$HOME/.n8n/.env" | xargs)
+fi
+
+# Verificar si n8n ya está corriendo
+if pm2 list | grep -q "n8n.*online"; then
+    echo "n8n ya está corriendo."
+else
+    echo "Iniciando n8n..."
+    pm2 start n8n --name n8n
+    pm2 save
+fi
+EOF
+            
+            chmod +x "$HOME/.n8n_autostart.sh"
+            
+            # Añadir al bashrc
+            if ! grep -q ".n8n_autostart.sh" "$HOME/.bashrc"; then
+                echo "
+# Autoinicio de n8n
+~/.n8n_autostart.sh &" >> "$HOME/.bashrc"
+            fi
+            
+            echo -e "${GREEN}==> Autoinicio configurado${NC}"
+            ;;
+            
+        4)
+            echo -e "${GREEN}==> Aplicando todas las soluciones${NC}"
+            
+            # Solución 1: Configurar una sola sesión
+            cat > "$HOME/.termux_start.sh" << 'EOF'
+#!/data/data/com.termux/files/usr/bin/bash
+# Script de inicio único para Termux
+
+# Verificar si ya hay una sesión activa
+if pgrep -f "termux" > /dev/null; then
+    echo "Termux ya está ejecutándose. Usando sesión existente."
+    exit 0
+fi
+
+# Cargar configuración de n8n si existe
+if [ -f "$HOME/.n8n/.env" ]; then
+    export $(grep -v '^#' "$HOME/.n8n/.env" | xargs)
+fi
+
+# Resucitar procesos PM2
+pm2 resurrect 2>/dev/null || true
+
+echo "Termux iniciado correctamente."
+EOF
+            
+            chmod +x "$HOME/.termux_start.sh"
+            
+            # Solución 2: Cerrar sesiones existentes
+            pkill -f "termux" 2>/dev/null || true
+            
+            # Solución 3: Configurar autoinicio
+            cat > "$HOME/.n8n_autostart.sh" << 'EOF'
+#!/data/data/com.termux/files/usr/bin/bash
+# Autoinicio de n8n
+
+# Esperar un poco para que Termux se inicie completamente
+sleep 3
+
+# Cargar variables de entorno
+if [ -f "$HOME/.n8n/.env" ]; then
+    export $(grep -v '^#' "$HOME/.n8n/.env" | xargs)
+fi
+
+# Verificar si n8n ya está corriendo
+if pm2 list | grep -q "n8n.*online"; then
+    echo "n8n ya está corriendo."
+else
+    echo "Iniciando n8n..."
+    pm2 start n8n --name n8n
+    pm2 save
+fi
+EOF
+            
+            chmod +x "$HOME/.n8n_autostart.sh"
+            
+            # Limpiar bashrc y añadir configuraciones
+            cp "$HOME/.bashrc" "$HOME/.bashrc.backup"
+            
+            # Crear nuevo bashrc
+            cat > "$HOME/.bashrc" << 'EOF'
+# ~/.bashrc
+
+# Inicio único de Termux
+source ~/.termux_start.sh
+
+# PM2 resurrect
+pm2 resurrect
+
+# Autoinicio de n8n
+~/.n8n_autostart.sh &
+
+# PATH personalizado
+export PATH=$HOME/.local/bin:$PATH
+EOF
+            
+            echo -e "${GREEN}==> Todas las soluciones aplicadas${NC}"
+            echo "Backup del bashrc guardado en ~/.bashrc.backup"
+            ;;
+            
+        *)
+            echo -e "${RED}Opción inválida${NC}"
+            return 1
+            ;;
+    esac
+    
+    echo ""
+    echo -e "${GREEN}==> Solución completada${NC}"
+    echo ""
+    echo -e "${YELLOW}Recomendaciones adicionales:${NC}"
+    echo "1. Reinicia Termux completamente"
+    echo "2. Verifica que n8n se inicie automáticamente"
+    echo "3. Si el problema persiste, usa: pkill -f termux"
+    echo ""
+    echo -e "${BLUE}Para verificar el estado:${NC}"
+    echo "  pm2 list"
+    echo "  pm2 logs n8n"
+}
+
 # Función para mostrar el menú
 show_menu() {
     echo -e "${BLUE}========================================${NC}"
@@ -47,9 +324,11 @@ show_menu() {
     echo "7) Reiniciar n8n"
     echo "8) Ver logs de n8n"
     echo "9) Solucionar locks de apt"
-    echo "10) Salir"
+    echo "10) Configurar email"
+    echo "11) Solucionar sesiones de Termux"
+    echo "12) Salir"
     echo ""
-    echo -n "Selecciona una opción (1-10): "
+    echo -n "Selecciona una opción (1-12): "
 }
 
 # Función para instalar n8n
@@ -99,6 +378,33 @@ install_n8n() {
 
     echo -e "${GREEN}==> 7) Creando carpeta de datos de n8n${NC}"
     mkdir -p $HOME/.n8n
+    
+    echo -e "${GREEN}==> 7.1) Configurando variables de entorno para email${NC}"
+    # Crear archivo de configuración de email
+    cat > "$HOME/.n8n/.env" << 'EOF'
+# Configuración de N8N
+N8N_PORT=5678
+N8N_USER_FOLDER=$HOME/.n8n
+NODE_ENV=production
+
+# Configuración de Email (Gmail como ejemplo)
+N8N_EMAIL_MODE=smtp
+N8N_SMTP_HOST=smtp.gmail.com
+N8N_SMTP_PORT=587
+N8N_SMTP_USER=tu_email@gmail.com
+N8N_SMTP_PASS=tu_contraseña_de_aplicacion
+N8N_SMTP_SENDER=tu_email@gmail.com
+N8N_SMTP_SECURE=false
+
+# Configuración de notificaciones
+N8N_PERSONALIZATION_ENABLED=true
+N8N_USER_MANAGEMENT_DISABLED=false
+EOF
+    
+    echo -e "${YELLOW}==> IMPORTANTE: Edita ~/.n8n/.env con tus credenciales de email${NC}"
+    echo "   - Cambia 'tu_email@gmail.com' por tu email real"
+    echo "   - Cambia 'tu_contraseña_de_aplicacion' por tu contraseña de aplicación"
+    echo "   - Para Gmail, usa contraseñas de aplicación, no tu contraseña normal"
 
     echo -e "${GREEN}==> 8) Añadiendo resurrect de PM2 al bashrc${NC}"
     grep -q "pm2 resurrect" "$HOME/.bashrc" || echo "
@@ -185,6 +491,15 @@ export PATH=\$HOME/.local/bin:\$PATH" >> "$HOME/.bashrc"
 # Función para iniciar n8n
 start_n8n() {
     echo -e "${GREEN}==> Iniciando n8n con PM2${NC}"
+    
+    # Cargar variables de entorno si existen
+    if [ -f "$HOME/.n8n/.env" ]; then
+        echo -e "${BLUE}==> Cargando configuración de email desde ~/.n8n/.env${NC}"
+        export $(grep -v '^#' "$HOME/.n8n/.env" | xargs)
+    else
+        echo -e "${YELLOW}==> Archivo ~/.n8n/.env no encontrado. Email no configurado.${NC}"
+        echo "   Ejecuta la instalación nuevamente o crea el archivo manualmente."
+    fi
     
     # Verificar si el comando n8n está disponible
     if command -v n8n >/dev/null 2>&1; then
@@ -349,6 +664,12 @@ main() {
                 fix_apt_locks
                 ;;
             10)
+                configure_email
+                ;;
+            11)
+                fix_termux_sessions
+                ;;
+            12)
                 echo -e "${GREEN}¡Hasta luego!${NC}"
                 exit 0
                 ;;
@@ -358,7 +679,7 @@ main() {
                 ;;
         esac
 
-        if [ "$choice" != "8" ] && [ "$choice" != "10" ]; then
+        if [ "$choice" != "8" ] && [ "$choice" != "12" ]; then
             echo ""
             echo -n "Presiona Enter para continuar..."
             read
@@ -396,8 +717,14 @@ if [ $# -gt 0 ]; then
         "fix-locks")
             fix_apt_locks
             ;;
+        "configure-email")
+            configure_email
+            ;;
+        "fix-sessions")
+            fix_termux_sessions
+            ;;
         *)
-            echo "Uso: $0 [install|start|backup|restore|status|stop|restart|logs|fix-locks]"
+            echo "Uso: $0 [install|start|backup|restore|status|stop|restart|logs|fix-locks|configure-email|fix-sessions]"
             echo "O ejecuta sin argumentos para el menú interactivo."
             exit 1
             ;;
