@@ -63,15 +63,98 @@ install_n8n() {
     grep -q "pm2 resurrect" "$HOME/.bashrc" || echo "
 pm2 resurrect" >> "$HOME/.bashrc"
 
+    echo -e "${GREEN}==> 8) Creando alias global para n8n${NC}"
+    # Crear alias para n8n que use PM2
+    if ! grep -q "alias n8n=" "$HOME/.bashrc"; then
+        echo "
+# Alias para n8n con PM2
+alias n8n='pm2 start n8n --name n8n || pm2 restart n8n || pm2 logs n8n'" >> "$HOME/.bashrc"
+    fi
+
+    echo -e "${GREEN}==> 9) Creando script ejecutable n8n${NC}"
+    # Crear script ejecutable en PATH
+    mkdir -p "$HOME/.local/bin"
+    cat > "$HOME/.local/bin/n8n" << 'EOF'
+#!/data/data/com.termux/files/usr/bin/bash
+# Script para gestionar n8n con PM2
+
+case "$1" in
+    "start")
+        pm2 start n8n --name n8n
+        pm2 save
+        echo "n8n iniciado con PM2"
+        ;;
+    "stop")
+        pm2 stop n8n
+        pm2 save
+        echo "n8n detenido"
+        ;;
+    "restart")
+        pm2 restart n8n
+        pm2 save
+        echo "n8n reiniciado"
+        ;;
+    "status")
+        pm2 status n8n
+        ;;
+    "logs")
+        pm2 logs n8n
+        ;;
+    "open")
+        termux-open-url http://localhost:5678
+        ;;
+    *)
+        echo "Uso: n8n [start|stop|restart|status|logs|open]"
+        echo ""
+        echo "Comandos disponibles:"
+        echo "  start   - Iniciar n8n con PM2"
+        echo "  stop    - Detener n8n"
+        echo "  restart - Reiniciar n8n"
+        echo "  status  - Ver estado de n8n"
+        echo "  logs    - Ver logs en tiempo real"
+        echo "  open    - Abrir n8n en el navegador"
+        echo ""
+        echo "Sin argumentos: muestra esta ayuda"
+        ;;
+esac
+EOF
+    chmod +x "$HOME/.local/bin/n8n"
+
+    echo -e "${GREEN}==> 10) Añadiendo ~/.local/bin al PATH${NC}"
+    if ! grep -q "export PATH=\$HOME/.local/bin:\$PATH" "$HOME/.bashrc"; then
+        echo "
+# Añadir ~/.local/bin al PATH
+export PATH=\$HOME/.local/bin:\$PATH" >> "$HOME/.bashrc"
+    fi
+
     echo -e "${GREEN}==> ¡Instalación completada!${NC}"
-    echo "Puedes usar la opción 2 para iniciar n8n."
+    echo ""
+    echo -e "${YELLOW}� IMPORTANTE:${NC}"
+    echo "1. Reinicia Termux o ejecuta: source ~/.bashrc"
+    echo "2. Ahora puedes usar el comando 'n8n' directamente:"
+    echo "   - n8n start    # Iniciar n8n"
+    echo "   - n8n stop     # Detener n8n"
+    echo "   - n8n status   # Ver estado"
+    echo "   - n8n logs     # Ver logs"
+    echo "   - n8n open     # Abrir en navegador"
+    echo ""
+    echo "También puedes usar la opción 2 de este menú para iniciar n8n."
 }
 
 # Función para iniciar n8n
 start_n8n() {
     echo -e "${GREEN}==> Iniciando n8n con PM2${NC}"
-    pm2 start n8n || true
-    pm2 save
+    
+    # Verificar si el comando n8n está disponible
+    if command -v n8n >/dev/null 2>&1; then
+        echo -e "${BLUE}==> Usando comando n8n personalizado${NC}"
+        n8n start
+    else
+        echo -e "${YELLOW}==> Usando PM2 directamente (comando n8n no disponible)${NC}"
+        pm2 start n8n || true
+        pm2 save
+    fi
+    
     pm2 status
 
     echo -e "${GREEN}==> n8n está corriendo en segundo plano.${NC}"
@@ -149,16 +232,30 @@ show_pm2_status() {
 # Función para detener n8n
 stop_n8n() {
     echo -e "${YELLOW}==> Deteniendo n8n${NC}"
-    pm2 stop n8n || true
-    pm2 save
+    
+    # Verificar si el comando n8n está disponible
+    if command -v n8n >/dev/null 2>&1; then
+        n8n stop
+    else
+        pm2 stop n8n || true
+        pm2 save
+    fi
+    
     echo -e "${GREEN}==> n8n detenido${NC}"
 }
 
 # Función para reiniciar n8n
 restart_n8n() {
     echo -e "${YELLOW}==> Reiniciando n8n${NC}"
-    pm2 restart n8n || true
-    pm2 save
+    
+    # Verificar si el comando n8n está disponible
+    if command -v n8n >/dev/null 2>&1; then
+        n8n restart
+    else
+        pm2 restart n8n || true
+        pm2 save
+    fi
+    
     pm2 status
     echo -e "${GREEN}==> n8n reiniciado${NC}"
 }
@@ -166,7 +263,13 @@ restart_n8n() {
 # Función para ver logs
 show_logs() {
     echo -e "${GREEN}==> Mostrando logs de n8n (Ctrl+C para salir)${NC}"
-    pm2 logs n8n
+    
+    # Verificar si el comando n8n está disponible
+    if command -v n8n >/dev/null 2>&1; then
+        n8n logs
+    else
+        pm2 logs n8n
+    fi
 }
 
 # Función principal
