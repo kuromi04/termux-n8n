@@ -50,6 +50,7 @@
 - � **Menú interactivo** con navegación intuitiva
 - � **Interfaz colorida** con emojis y formato visual
 - ⚙️ **Modo no interactivo** para automatización
+- � **Comando directo `n8n`** disponible globalmente después de la instalación
 - � **Gestión completa** de procesos con PM2
 - � **Sistema de backup** automático con timestamps
 - �️ **Validaciones robustas** de errores y dependencias
@@ -146,6 +147,18 @@ curl -sSL https://raw.githubusercontent.com/tu-usuario/n8n-termux-android-ia/mai
 ./scripts/n8n_manager.sh logs
 ```
 
+### � **Comando Directo n8n (Después de la Instalación)**
+```bash
+# Después de la instalación, puedes usar directamente:
+n8n start     # Iniciar n8n
+n8n stop      # Detener n8n
+n8n restart   # Reiniciar n8n
+n8n status    # Ver estado
+n8n logs      # Ver logs
+n8n open      # Abrir en navegador
+n8n           # Mostrar ayuda
+```
+
 ---
 
 ## � Requisitos del Sistema
@@ -201,6 +214,13 @@ curl -sSL https://raw.githubusercontent.com/tu-usuario/n8n-termux-android-ia/mai
 - ⚡ **Navegación rápida** con teclas de acceso
 - � **Mensajes informativos** y de error claros
 - � **Indicadores visuales** de progreso
+
+### � **5. Comando Directo n8n**
+- ⚡ **Acceso global** al comando `n8n` desde cualquier directorio
+- � **Comandos intuitivos** con subcomandos fáciles de recordar
+- � **Gestión completa** sin necesidad del menú interactivo
+- � **Integración perfecta** con Termux y PM2
+- � **Sistema de ayuda** integrado con `n8n` sin argumentos
 
 ---
 
