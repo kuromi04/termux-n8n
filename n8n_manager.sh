@@ -164,13 +164,14 @@ source ~/.termux_start.sh" >> "$HOME/.bashrc"
             ;;
             
         2)
-            echo -e "${GREEN}==> Cerrando todas las sesiones de Termux${NC}"
+            echo -e "${GREEN}==> Cerrando procesos de apt/dpkg solamente${NC}"
             
-            # Cerrar todas las sesiones de Termux
-            pkill -f "termux" 2>/dev/null || true
+            # Cerrar solo procesos de apt/dpkg, NO Termux
+            pkill -f "apt" 2>/dev/null || true
+            pkill -f "dpkg" 2>/dev/null || true
             
-            echo -e "${GREEN}==> Sesiones cerradas${NC}"
-            echo "Ahora puedes abrir Termux nuevamente."
+            echo -e "${GREEN}==> Procesos de apt/dpkg cerrados${NC}"
+            echo "Termux sigue funcionando normalmente."
             ;;
             
         3)
@@ -238,8 +239,9 @@ EOF
             
             chmod +x "$HOME/.termux_start.sh"
             
-            # Solución 2: Cerrar sesiones existentes
-            pkill -f "termux" 2>/dev/null || true
+            # Solución 2: Cerrar solo procesos de apt/dpkg
+            pkill -f "apt" 2>/dev/null || true
+            pkill -f "dpkg" 2>/dev/null || true
             
             # Solución 3: Configurar autoinicio
             cat > "$HOME/.n8n_autostart.sh" << 'EOF'
@@ -302,7 +304,7 @@ EOF
     echo -e "${YELLOW}Recomendaciones adicionales:${NC}"
     echo "1. Reinicia Termux completamente"
     echo "2. Verifica que n8n se inicie automáticamente"
-    echo "3. Si el problema persiste, usa: pkill -f termux"
+    echo "3. Si el problema persiste, reinicia tu dispositivo Android"
     echo ""
     echo -e "${BLUE}Para verificar el estado:${NC}"
     echo "  pm2 list"
