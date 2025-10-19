@@ -82,7 +82,7 @@ pkg install -y git
 
 ### � **Paso 2: Clonar el Repositorio**
 ```bash
-git clone https://github.com/tu-usuario/n8n-termux-android-ia.git
+git clone https://github.com/kuromi04/n8n-termux-android-ia.git
 cd n8n-termux-android-ia
 ```
 
@@ -331,7 +331,7 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para
 
 ## � Créditos
 
-- **Autor**: @tiendastelegram
+- **Autor**: @kuromi04
 - **Inspirado por**: La comunidad de IvanByCinderella, n8n y Termux
 - **Telegram**: https://t.me/tiendastelegram
 - **YouTube**: [Video tutorial](https://www.youtube.com/watch?v=DYtlUBZ3Od4)
@@ -374,7 +374,7 @@ n8n backup  # Si está implementado
 
 ## � Instalación de Termux
 
-> ⚠️ **Importante**: Siempre instala Termux desde su [repositorio oficial en GitHub](https://github.com/termux/termux-app/releases) o desde los **Termux Packages** de [IvanByCinderella](https://github.com/IvanByCinderella/termux-packages).  
+> ⚠️ **Importante**: Siempre instala Termux desde su [repositorio oficial en GitHub](https://github.com/termux/termux-app/releases) o desde los **Termux Packages** de [IvanByCinderella](https://github.com/ivam3/termux-packages).  
 > No uses la versión de Google Play: está desactualizada y puede dar problemas con n8n.
 
 ### **Opción 1 – GitHub oficial de Termux**
@@ -383,7 +383,7 @@ n8n backup  # Si está implementado
 3. Instala el APK (activa "permitir orígenes desconocidos" si es necesario)
 
 ### **Opción 2 – Termux Packages de IvanByCinderella**
-1. Abre: [https://github.com/IvanByCinderella/termux-packages](https://github.com/IvanByCinderella/termux-packages)
+1. Abre: [https://github.com/IvanByCinderella/termux-packages](https://github.com/Ivan3/termux-packages)
 2. En releases, descarga el `.apk` más reciente
 3. Instálalo igual que en la opción 1
 
@@ -414,9 +414,9 @@ Con n8n en tu Android puedes automatizar casi cualquier cosa:
 
 ### � **¿Te gusta este proyecto?**
 
-[![GitHub stars](https://img.shields.io/github/stars/tu-usuario/n8n-termux-android-ia?style=social)](https://github.com/tu-usuario/n8n-termux-android-ia/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/tu-usuario/n8n-termux-android-ia?style=social)](https://github.com/tu-usuario/n8n-termux-android-ia/network)
-[![GitHub watchers](https://img.shields.io/github/watchers/tu-usuario/n8n-termux-android-ia?style=social)](https://github.com/tu-usuario/n8n-termux-android-ia/watchers)
+[![GitHub stars](https://img.shields.io/github/stars/kuromi04/n8n-termux-android-ia?style=social)](https://github.com/kuromi04/n8n-termux-android-ia/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/kuromi04/n8n-termux-android-ia?style=social)](https://github.com/kuromi04/n8n-termux-android-ia/network)
+[![GitHub watchers](https://img.shields.io/github/watchers/kuromi04/n8n-termux-android-ia?style=social)](https://github.com/kuromi04/n8n-termux-android-ia/watchers)
 
 **¡Dale una ⭐ si te ha sido útil!**
 
