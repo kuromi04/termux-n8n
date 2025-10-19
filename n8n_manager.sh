@@ -1,16 +1,14 @@
-#!/data/data/com.termux/files/usr/bin/bash
-set -euo pipefail
-
-# Colores para la salida
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
-# Función para mostrar el menú
-show_menu() {
-    echo -e "${BLUE}========================================${NC}"
+# Función para ver logs
+show_logs() {
+    echo -e "${GREEN}==> Mostrando logs de n8n (Ctrl+C para salir)${NC}"
+    
+    # Verificar si el comando n8n está disponible
+    if command -v n8n >/dev/null 2>&1; then
+        n8n logs
+    else
+        pm2 logs n8n
+    fi
+}==========================${NC}"
     echo -e "${BLUE}    GESTOR DE N8N PARA TERMUX ANDROID${NC}"
     echo -e "${BLUE}========================================${NC}"
     echo ""
