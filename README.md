@@ -1,16 +1,15 @@
-### � **4. Interfaz de Usuario**
-- � **Colores y emojis** para mejor experiencia
-- � **Diseño responsive** para pantallas pequeñas
-- ⚡ **Navegación rápida** con teclas de acceso
-- � **Mensajes informativos** y de error claros
-- � **Indicadores visuales** de progreso
+<div align="center">
 
-### � **5. Comando Directo n8n**
-- ⚡ **Acceso global** al comando `n8n` desde cualquier directorio
-- � **Comandos intuitivos** con subcomandos fáciles de recordar
-- � **Gestión completa** sin necesidad del menú interactivo
-- � **Integración perfecta** con Termux y PM2
-- � **Sistema de ayuda** integrado con `n8n` sin argumentos8n.io/)
+# � N8N Manager para Termux Android
+
+![N8N Logo](https://raw.githubusercontent.com/n8n-io/n8n/master/assets/n8n-logo.png)
+![Termux Logo](https://raw.githubusercontent.com/termux/termux-app/master/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png)
+
+**Gestor unificado y profesional para N8N en dispositivos Android con Termux**
+
+[![Bash](https://img.shields.io/badge/Bash-4.4+-green.svg)](https://www.gnu.org/software/bash/)
+[![Termux](https://img.shields.io/badge/Termux-Android-blue.svg)](https://termux.com/)
+[![N8N](https://img.shields.io/badge/N8N-Automation-orange.svg)](https://n8n.io/)
 [![PM2](https://img.shields.io/badge/PM2-Process%20Manager-red.svg)](https://pm2.keymetrics.io/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -305,7 +304,7 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para
 
 ---
 
-**Desarrollado con ❤️ para la comunidad de Termux y N8N**
+**Desarrollado por @kuromi04 para la comunidad de Termux y N8N**
 
 [![Termux](https://img.shields.io/badge/Made%20for-Termux-1f425f.svg)](https://termux.com/)
 [![N8N](https://img.shields.io/badge/Powered%20by-N8N-ff6d5a.svg)](https://n8n.io/)
