@@ -8,6 +8,30 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+# Función para liberar locks de apt
+fix_apt_locks() {
+    echo -e "${YELLOW}==> Solucionando problemas de locks de apt${NC}"
+    
+    # Verificar si hay procesos apt ejecutándose
+    if pgrep -f "apt|dpkg" > /dev/null; then
+        echo -e "${YELLOW}==> Procesos apt/dpkg detectados, esperando a que terminen...${NC}"
+        while pgrep -f "apt|dpkg" > /dev/null; do
+            echo -e "${BLUE}==> Esperando a que terminen los procesos apt/dpkg...${NC}"
+            sleep 5
+        done
+        echo -e "${GREEN}==> Procesos apt/dpkg terminados${NC}"
+    fi
+    
+    # Limpiar locks si existen
+    echo -e "${GREEN}==> Limpiando locks de apt/dpkg${NC}"
+    rm -f /data/data/com.termux/files/usr/var/lib/dpkg/lock-frontend 2>/dev/null || true
+    rm -f /data/data/com.termux/files/usr/var/lib/dpkg/lock 2>/dev/null || true
+    rm -f /data/data/com.termux/files/usr/var/cache/apt/archives/lock 2>/dev/null || true
+    
+    echo -e "${GREEN}==> Locks limpiados exitosamente${NC}"
+    echo "Ahora puedes intentar la instalación nuevamente."
+}
+
 # Función para mostrar el menú
 show_menu() {
     echo -e "${BLUE}========================================${NC}"
@@ -22,9 +46,10 @@ show_menu() {
     echo "6) Detener n8n"
     echo "7) Reiniciar n8n"
     echo "8) Ver logs de n8n"
-    echo "9) Salir"
+    echo "9) Solucionar locks de apt"
+    echo "10) Salir"
     echo ""
-    echo -n "Selecciona una opción (1-9): "
+    echo -n "Selecciona una opción (1-10): "
 }
 
 # Función para instalar n8n
@@ -41,29 +66,45 @@ install_n8n() {
         return
     fi
 
-    echo -e "${GREEN}==> 1) Actualizando Termux${NC}"
+    echo -e "${GREEN}==> 1) Verificando y liberando locks de apt${NC}"
+    # Verificar si hay procesos apt ejecutándose
+    if pgrep -f "apt|dpkg" > /dev/null; then
+        echo -e "${YELLOW}==> Procesos apt/dpkg detectados, esperando a que terminen...${NC}"
+        while pgrep -f "apt|dpkg" > /dev/null; do
+            echo -e "${BLUE}==> Esperando a que terminen los procesos apt/dpkg...${NC}"
+            sleep 5
+        done
+        echo -e "${GREEN}==> Procesos apt/dpkg terminados${NC}"
+    fi
+    
+    # Limpiar locks si existen
+    sudo rm -f /data/data/com.termux/files/usr/var/lib/dpkg/lock-frontend 2>/dev/null || true
+    sudo rm -f /data/data/com.termux/files/usr/var/lib/dpkg/lock 2>/dev/null || true
+    sudo rm -f /data/data/com.termux/files/usr/var/cache/apt/archives/lock 2>/dev/null || true
+    
+    echo -e "${GREEN}==> 2) Actualizando Termux${NC}"
     pkg update -y && pkg upgrade -y
 
-    echo -e "${GREEN}==> 2) Instalando dependencias de compilación y runtime${NC}"
+    echo -e "${GREEN}==> 3) Instalando dependencias de compilación y runtime${NC}"
     pkg install -y nodejs-lts python binutils make clang pkg-config libsqlite ndk-sysroot
 
-    echo -e "${GREEN}==> 3) Configurando solución NDK para node-gyp${NC}"
+    echo -e "${GREEN}==> 4) Configurando solución NDK para node-gyp${NC}"
     export GYP_DEFINES="android_ndk_path=''"
 
-    echo -e "${GREEN}==> 4) Instalando n8n con SQLite embebido${NC}"
+    echo -e "${GREEN}==> 5) Instalando n8n con SQLite embebido${NC}"
     npm install -g n8n --sqlite=/data/data/com.termux/files/usr/bin/sqlite3
 
-    echo -e "${GREEN}==> 5) Instalando PM2 (gestor de procesos)${NC}"
+    echo -e "${GREEN}==> 6) Instalando PM2 (gestor de procesos)${NC}"
     npm install -g pm2
 
-    echo -e "${GREEN}==> 6) Creando carpeta de datos de n8n${NC}"
+    echo -e "${GREEN}==> 7) Creando carpeta de datos de n8n${NC}"
     mkdir -p $HOME/.n8n
 
-    echo -e "${GREEN}==> 7) Añadiendo resurrect de PM2 al bashrc${NC}"
+    echo -e "${GREEN}==> 8) Añadiendo resurrect de PM2 al bashrc${NC}"
     grep -q "pm2 resurrect" "$HOME/.bashrc" || echo "
 pm2 resurrect" >> "$HOME/.bashrc"
 
-    echo -e "${GREEN}==> 8) Creando alias global para n8n${NC}"
+    echo -e "${GREEN}==> 9) Creando alias global para n8n${NC}"
     # Crear alias para n8n que use PM2
     if ! grep -q "alias n8n=" "$HOME/.bashrc"; then
         echo "
@@ -71,7 +112,7 @@ pm2 resurrect" >> "$HOME/.bashrc"
 alias n8n='pm2 start n8n --name n8n || pm2 restart n8n || pm2 logs n8n'" >> "$HOME/.bashrc"
     fi
 
-    echo -e "${GREEN}==> 9) Creando script ejecutable n8n${NC}"
+    echo -e "${GREEN}==> 10) Creando script ejecutable n8n${NC}"
     # Crear script ejecutable en PATH
     mkdir -p "$HOME/.local/bin"
     cat > "$HOME/.local/bin/n8n" << 'EOF'
@@ -120,7 +161,7 @@ esac
 EOF
     chmod +x "$HOME/.local/bin/n8n"
 
-    echo -e "${GREEN}==> 10) Añadiendo ~/.local/bin al PATH${NC}"
+    echo -e "${GREEN}==> 11) Añadiendo ~/.local/bin al PATH${NC}"
     if ! grep -q "export PATH=\$HOME/.local/bin:\$PATH" "$HOME/.bashrc"; then
         echo "
 # Añadir ~/.local/bin al PATH
@@ -305,6 +346,9 @@ main() {
                 show_logs
                 ;;
             9)
+                fix_apt_locks
+                ;;
+            10)
                 echo -e "${GREEN}¡Hasta luego!${NC}"
                 exit 0
                 ;;
@@ -314,7 +358,7 @@ main() {
                 ;;
         esac
 
-        if [ "$choice" != "8" ] && [ "$choice" != "9" ]; then
+        if [ "$choice" != "8" ] && [ "$choice" != "10" ]; then
             echo ""
             echo -n "Presiona Enter para continuar..."
             read
@@ -349,8 +393,11 @@ if [ $# -gt 0 ]; then
         "logs")
             show_logs
             ;;
+        "fix-locks")
+            fix_apt_locks
+            ;;
         *)
-            echo "Uso: $0 [install|start|backup|restore|status|stop|restart|logs]"
+            echo "Uso: $0 [install|start|backup|restore|status|stop|restart|logs|fix-locks]"
             echo "O ejecuta sin argumentos para el menú interactivo."
             exit 1
             ;;
@@ -358,4 +405,3 @@ if [ $# -gt 0 ]; then
 else
     main
 fi
-
