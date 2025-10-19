@@ -306,7 +306,7 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para
 
 ---
 
-**Desarrollado con ❤️ para la comunidad de Termux y N8N**
+**Desarrollado por kuromi04 para la comunidad de Termux y N8N**
 
 [![Termux](https://img.shields.io/badge/Made%20for-Termux-1f425f.svg)](https://termux.com/)
 [![N8N](https://img.shields.io/badge/Powered%20by-N8N-ff6d5a.svg)](https://n8n.io/)
