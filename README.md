@@ -381,7 +381,7 @@ n8n backup  # Si está implementado
 
 ## � Instalación de Termux
 
-> ⚠️ **Importante**: Siempre instala Termux desde su [repositorio oficial en GitHub](https://github.com/termux/termux-app/releases) o desde los **Termux Packages** de [IvanByCinderella](https://github.com/IvanByCinderella/termux-packages).  
+> ⚠️ **Importante**: Siempre instala Termux desde su [repositorio oficial en GitHub](https://github.com/termux/termux-app/releases) o desde los **Termux Packages** de [Ivam3ByCinderella](https://github.com/Ivam3ByCinderella/termux-packages).  
 > No uses la versión de Google Play: está desactualizada y puede dar problemas con n8n.
 
 ### **Opción 1 – GitHub oficial de Termux**
@@ -389,8 +389,8 @@ n8n backup  # Si está implementado
 2. Busca la última versión estable (`.apk`) y descárgala
 3. Instala el APK (activa "permitir orígenes desconocidos" si es necesario)
 
-### **Opción 2 – Termux Packages de IvanByCinderella**
-1. Abre: [https://github.com/IvanByCinderella/termux-packages](https://github.com/IvanByCinderella/termux-packages)
+### **Opción 2 – Termux Packages de Ivam3ByCinderella**
+1. Abre: [https://github.com/IvanByCinderella/termux-packages](https://github.com/Ivam3ByCinderella/termux-packages)
 2. En releases, descarga el `.apk` más reciente
 3. Instálalo igual que en la opción 1
 
