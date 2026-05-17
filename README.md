@@ -390,7 +390,7 @@ n8n backup  # Si está implementado
 3. Instala el APK (activa "permitir orígenes desconocidos" si es necesario)
 
 ### **Opción 2 – Termux Packages de Ivam3ByCinderella**
-1. Abre: [https://github.com/IvanByCinderella/termux-packages](https://github.com/Ivam3ByCinderella/termux-packages)
+1. Abre: [https://github.com/ivam3/termux-packages](https://github.com/ivam3/termux-packages)
 2. En releases, descarga el `.apk` más reciente
 3. Instálalo igual que en la opción 1
 
